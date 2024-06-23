@@ -1,10 +1,16 @@
 import { useState } from 'react';
 
 import ImagePicker from '../ImagePicker.jsx';
+import { useQuery } from '@tanstack/react-query';
+import { fetchSelectableImages } from '../../util/http.js';
 
 export default function EventForm({ inputData, onSubmit, children }) {
   const [selectedImage, setSelectedImage] = useState(inputData?.image);
 
+  const {data, isPending, isError} = useQuery({
+    queryKey:['events-images'],
+    queryFn: fetchSelectableImages
+  })
   function handleSelectImage(image) {
     setSelectedImage(image);
   }
@@ -29,14 +35,22 @@ export default function EventForm({ inputData, onSubmit, children }) {
           defaultValue={inputData?.title ?? ''}
         />
       </p>
-
-      <div className="control">
-        <ImagePicker
-          images={[]}
-          onSelect={handleSelectImage}
-          selectedImage={selectedImage}
+      {isPending && <p>이미지 로딩 중...</p>}
+      {isError && 
+        <ErrorBlock 
+          title="문제 발생"
+          message={ error.info?.message || '이미지를 불러오지 못했습니다' }
         />
-      </div>
+      }
+      {data && (
+        <div className="control">
+          <ImagePicker
+            images={data}
+            onSelect={handleSelectImage}
+            selectedImage={selectedImage}
+          />
+        </div>
+      )}
 
       <p className="control">
         <label htmlFor="description">Description</label>
