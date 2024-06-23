@@ -12,7 +12,7 @@ export async function fetchEvents({ signal, searchTerm }) {
   const response = await fetch(url, { signal: signal })
 
   if (!response.ok) {
-    const error = new Error('데이터 전송 중 문제가 발생했습니다')
+    const error = new Error('데이터를 받아오는 중에 문제가 발생했습니다')
     error.code = response.status
     error.info = await response.json()
     throw error
@@ -49,7 +49,7 @@ export async function fetchSelectableImages({ signal }) {
   const response = await fetch(`http://localhost:3000/events/images`, { signal })
 
   if (!response.ok) {
-    const error = new Error('사진 업로드 중에 문제가 생겼습니다')
+    const error = new Error('사진 업로드 중에 문제가 발생했습니다')
     error.code = response.status
     error.info = await response.json()
     throw error
@@ -58,4 +58,35 @@ export async function fetchSelectableImages({ signal }) {
   const { images } = await response.json()
 
   return images
+}
+
+export async function fetchEvent({ id, signal }) {
+  const response = await fetch(`http://localhost:3000/events/${id}`, { signal })
+
+  if (!response.ok) {
+    const error = new Error('데이터를 받아오는 중에 문제가 발생했습니다')
+    error.code = response.status
+    error.info = await response.json()
+    throw error
+  }
+
+  const { event } = await response.json()
+
+  return event
+}
+
+
+export async function deleteEvent({ id }) {
+  const response = await fetch(`http://localhost:3000/events/${id}`, {
+    method: 'DELETE',
+  })
+
+  if (!response.ok) {
+    const error = new Error('데이터를 삭제하는 중에 문제가 발생했습니다')
+    error.code = response.status
+    error.info = await response.json()
+    throw error
+  }
+
+  return response.json()
 }
