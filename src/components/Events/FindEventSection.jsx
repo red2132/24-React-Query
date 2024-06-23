@@ -1,10 +1,48 @@
-import { useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useRef, useState } from 'react';
+import { fetchEvents } from '../../util/http';
+import LoadingIndicator from '../UI/LoadingIndicator';
+import EventItem from './EventItem';
 
 export default function FindEventSection() {
   const searchElement = useRef();
+  const [searchTerm, setSearchTerm] = useState()
+
+  const {data, isLoading, isError, error} = useQuery({
+    queryKey: ['events', {search: searchTerm}],
+    queryFn: ({signal}) => fetchEvents({ signal, searchTerm }),
+    enabled: searchTerm !== undefined // 검색어를 입력했을 때만 활성화
+  })
 
   function handleSubmit(event) {
     event.preventDefault();
+    setSearchTerm(searchElement.current.value)
+  }
+  let content = <p>검색어를 입력해 주세요.</p>
+
+  if(isLoading) {
+    content = <LoadingIndicator />
+  }
+
+  if (isError) {
+    content = (
+      <ErrorBlock 
+        title="문제 발생"
+        message={ error.info?.message || '데이터를 불러오지 못했습니다' }
+      />
+    )
+  }
+
+  if (data) {
+    content = (
+      <ul className="events-list">
+        {data.map((event) => (
+          <li key={event.id}>
+            <EventItem event={event} />
+          </li>
+        ))}
+      </ul>
+    );
   }
 
   return (
@@ -20,7 +58,7 @@ export default function FindEventSection() {
           <button>Search</button>
         </form>
       </header>
-      <p>Please enter a search term and to find events.</p>
+      {content}
     </section>
   );
 }

@@ -13,10 +13,10 @@ export default function NewEventsSection() {
     // gcTime 캐시 저장기간 관리 
   })
 
-  let content;
+  let content
 
   if (isPending) {
-    content = <LoadingIndicator />;
+    content = <LoadingIndicator />
   }
 
   if (isError) {
@@ -25,7 +25,7 @@ export default function NewEventsSection() {
         title="문제 발생"
         message={ error.info?.message || '데이터를 불러오지 못했습니다' }
       />
-    );
+    )
   }
 
   if (data) {
