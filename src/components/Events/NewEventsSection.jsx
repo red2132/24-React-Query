@@ -1,52 +1,30 @@
-import { useEffect, useState } from 'react';
-
 import LoadingIndicator from '../UI/LoadingIndicator.jsx';
 import ErrorBlock from '../UI/ErrorBlock.jsx';
 import EventItem from './EventItem.jsx';
 
+import { useQuery } from '@tanstack/react-query';
+import { fetchEvents } from '../../util/http.js';
+
 export default function NewEventsSection() {
-  const [data, setData] = useState();
-  const [error, setError] = useState();
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    async function fetchEvents() {
-      setIsLoading(true);
-      const response = await fetch('http://localhost:3000/events');
-
-      if (!response.ok) {
-        const error = new Error('An error occurred while fetching the events');
-        error.code = response.status;
-        error.info = await response.json();
-        throw error;
-      }
-
-      const { events } = await response.json();
-
-      return events;
-    }
-
-    fetchEvents()
-      .then((events) => {
-        setData(events);
-      })
-      .catch((error) => {
-        setError(error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+  const { data, isPending, isError, error } = useQuery({
+   queryKey: ['events'],
+    queryFn: fetchEvents, // http 요청 전송 로직
+    staleTime: 5000, // 캐시 유통기간
+    // gcTime 캐시 저장기간 관리 
+  })
 
   let content;
 
-  if (isLoading) {
+  if (isPending) {
     content = <LoadingIndicator />;
   }
 
-  if (error) {
+  if (isError) {
     content = (
-      <ErrorBlock title="An error occurred" message="Failed to fetch events" />
+      <ErrorBlock 
+        title="문제 발생"
+        message={ error.info?.message || '데이터를 불러오지 못했습니다' }
+      />
     );
   }
 
