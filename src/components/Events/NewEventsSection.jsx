@@ -7,8 +7,8 @@ import { fetchEvents } from '../../util/http.js';
 
 export default function NewEventsSection() {
   const { data, isPending, isError, error } = useQuery({
-   queryKey: ['events'],
-    queryFn: fetchEvents, // http 요청 전송 로직
+   queryKey: ['events', { max:3 }],
+    queryFn: ({ signal, queryKey }) => fetchEvents({ signal, ...queryKey[1] }), // http 요청 전송 로직
     staleTime: 5000, // 캐시 유통기간
     // gcTime 캐시 저장기간 관리 
   })
